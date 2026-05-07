@@ -1,4 +1,4 @@
-module github.com/hashicorp/terraform-provider-scaffolding-framework
+module terraform-provider-wohash
 
 go 1.25.8
 
@@ -7,6 +7,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.31.0
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-testing v1.16.0
+	github.com/hashicorp/terraform-provider-scaffolding-framework v0.0.0-20260428131959-61a84db31386
 )
 
 require (
