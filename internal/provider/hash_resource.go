@@ -13,27 +13,27 @@ import (
 	tftypes "github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type HasherResourceModel struct {
+type HashResourceModel struct {
 	ID      tftypes.String `tfsdk:"id"`
 	InputWO tftypes.String `tfsdk:"input_wo"`
 	Output  tftypes.String `tfsdk:"output"`
 }
 
-var _ resource.Resource = &HasherResource{}
-var _ resource.ResourceWithModifyPlan = &HasherResource{}
+var _ resource.Resource = &HashResource{}
+var _ resource.ResourceWithModifyPlan = &HashResource{}
 
-func NewHasherResource() resource.Resource {
-	return &HasherResource{}
+func NewHashResource() resource.Resource {
+	return &HashResource{}
 }
 
-type HasherResource struct {
+type HashResource struct {
 }
 
-func (r *HasherResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_hasher"
+func (r *HashResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_hash"
 }
 
-func (r *HasherResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *HashResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Accepts an ephemeral input and returns a hash of the input as a non-ephemeral output.",
 		Attributes: map[string]schema.Attribute{
@@ -60,15 +60,16 @@ func (r *HasherResource) Schema(ctx context.Context, req resource.SchemaRequest,
 	}
 }
 
-func (r *HasherResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *HashResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 }
 
-func (r *HasherResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	if req.Plan.Raw.IsNull() {
-		return // destroy
+func (r *HashResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	// create or destroy
+	if req.Plan.Raw.IsNull() || req.State.Raw.IsNull() {
+		return 
 	}
 
-	var config HasherResourceModel
+	var config HashResourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -80,13 +81,7 @@ func (r *HasherResource) ModifyPlan(ctx context.Context, req resource.ModifyPlan
 
 	newHash := hashInput(config.InputWO.ValueString())
 
-	if req.State.Raw.IsNull() {
-		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("id"), tftypes.StringValue(newHash))...)
-		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("output"), tftypes.StringValue(newHash))...)
-		return
-	}
-
-	var state HasherResourceModel
+	var state HashResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -98,14 +93,10 @@ func (r *HasherResource) ModifyPlan(ctx context.Context, req resource.ModifyPlan
 
 	resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("id"), tftypes.StringValue(newHash))...)
 	resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("output"), tftypes.StringValue(newHash))...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
-func (r *HasherResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-
-	var plan HasherResourceModel
+func (r *HashResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan HashResourceModel
 	diags := req.Config.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -119,8 +110,8 @@ func (r *HasherResource) Create(ctx context.Context, req resource.CreateRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
-func (r *HasherResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state HasherResourceModel
+func (r *HashResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state HashResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
@@ -130,15 +121,15 @@ func (r *HasherResource) Read(ctx context.Context, req resource.ReadRequest, res
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *HasherResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan HasherResourceModel
+func (r *HashResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan HashResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var config HasherResourceModel
+	var config HashResourceModel
 	diags = req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -152,8 +143,7 @@ func (r *HasherResource) Update(ctx context.Context, req resource.UpdateRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
-func (r *HasherResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	req.State.RemoveResource(ctx)
+func (r *HashResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 }
 
 func hashInput(s string) string {

@@ -31,7 +31,8 @@ func main() {
 		// TODO: Update this string with the published name of your provider.
 		// Also update the tfplugindocs generate command to either remove the
 		// -provider-name flag or set its value to the updated provider name.
-		Address: "registry.terraform.io/hashicorp/wohash",
+		// Address: "spacelift.teleport.dev/teleport/writeonly",
+		Address: "registry.terraform.io/bpdohall/writeonly",
 		Debug:   debug,
 	}
 

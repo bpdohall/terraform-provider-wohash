@@ -13,9 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
-func TestHasherResource(t *testing.T) {
+func TestAccHashResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
@@ -23,12 +22,12 @@ func TestHasherResource(t *testing.T) {
 				Config: testAccHasherInputWO("one"),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
-						"wohash_hasher.test",
+						"writeonly_hash.test",
 						tfjsonpath.New("id"),
 						knownvalue.StringExact(hashInput("one")),
 					),
 					statecheck.ExpectKnownValue(
-						"wohash_hasher.test",
+						"writeonly_hash.test",
 						tfjsonpath.New("output"),
 						knownvalue.StringExact(hashInput("one")),
 					),
@@ -39,12 +38,12 @@ func TestHasherResource(t *testing.T) {
 				Config: testAccHasherInputWO("two"),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
-						"wohash_hasher.test",
+						"writeonly_hash.test",
 						tfjsonpath.New("id"),
 						knownvalue.StringExact(hashInput("two")),
 					),
 					statecheck.ExpectKnownValue(
-						"wohash_hasher.test",
+						"writeonly_hash.test",
 						tfjsonpath.New("output"),
 						knownvalue.StringExact(hashInput("two")),
 					),
@@ -83,19 +82,13 @@ func TestHasherResource(t *testing.T) {
 
 func TestAccHasherWithEphemeral(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"tls": {
-				Source: "hashicorp/tls",
-			},
-		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccHasherEphemeralInput(),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
-						"wohash_hasher.testephem",
+						"writeonly_hash.testephem",
 						tfjsonpath.New("id"),
 						knownvalue.StringExact(hashInput("testvalue")),
 					),
@@ -119,7 +112,7 @@ func TestAccHasherWithEphemeral(t *testing.T) {
 				Config: testAccHasherEphemeralInput(),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
-						"wohash_hasher.testephem",
+						"writeonly_hash.testephem",
 						tfjsonpath.New("id"),
 						knownvalue.StringExact(hashInput("testvalue")),
 					),
@@ -137,7 +130,7 @@ func TestAccHasherWithEphemeral(t *testing.T) {
 				Config: testAccHasherEphemeralInput(),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
-						"wohash_hasher.testephem",
+						"writeonly_hash.testephem",
 						tfjsonpath.New("id"),
 						knownvalue.StringExact(hashInput("newvalue")),
 					),
@@ -157,7 +150,7 @@ func TestAccHasherWithEphemeral(t *testing.T) {
 
 func testAccHasherInputWO(value string) string {
 	return fmt.Sprintf(`
-resource "wohash_hasher" "test" {
+resource "writeonly_hash" "test" {
   input_wo = %[1]q
 }
 `, value)
@@ -170,12 +163,12 @@ variable "ephem" {
   ephemeral = true
 }
 
-resource "wohash_hasher" "testephem" {
+resource "writeonly_hash" "testephem" {
   input_wo = var.ephem
 }
 
 output "hash_of_input" {
-  value = wohash_hasher.testephem.output
+  value = writeonly_hash.testephem.output
 }
 `
 }

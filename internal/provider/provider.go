@@ -9,12 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
-// Ensure woHashProvider satisfies provider interface.
-var _ provider.Provider = &woHashProvider{}
+var _ provider.Provider = &writeonlyProvider{}
 
-
-// woHashProvider defines the provider implementation.
-type woHashProvider struct {
+// writeonlyProvider defines the provider implementation.
+type writeonlyProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
@@ -24,30 +22,30 @@ type woHashProvider struct {
 // New is a helper function to simplify provider server and testing implementation.
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
-		return &woHashProvider{
+		return &writeonlyProvider{
 			version: version,
 		}
 	}
 }
 
-func (p *woHashProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "wohash"
+func (p *writeonlyProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "writeonly"
 	resp.Version = p.version
 }
 
-func (p *woHashProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *writeonlyProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{}
 }
 
-func (p *woHashProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+func (p *writeonlyProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 }
 
-func (p *woHashProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *writeonlyProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewHasherResource,
+		NewHashResource,
 	}
 }
 
-func (p *woHashProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *writeonlyProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{}
 }
