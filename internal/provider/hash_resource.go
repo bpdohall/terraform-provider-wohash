@@ -66,7 +66,7 @@ func (r *HashResource) Configure(ctx context.Context, req resource.ConfigureRequ
 func (r *HashResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	// create or destroy
 	if req.Plan.Raw.IsNull() || req.State.Raw.IsNull() {
-		return 
+		return
 	}
 
 	var config HashResourceModel

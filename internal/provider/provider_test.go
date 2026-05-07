@@ -14,4 +14,3 @@ import (
 var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
 	"writeonly": providerserver.NewProtocol6WithError(New("test")()),
 }
-
